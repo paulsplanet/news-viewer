@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import usePromise from "../library/usePromise";
 import NewsItem from "./NewsItems";
 
 
@@ -19,7 +20,8 @@ const NewsListBlock = styled.div`
 
 const NewsList = ({ category }) => {
     //API code: 512f60d7572f4a1d8336a7d74b60cd1d
-    const [articles, setArticles] = useState(null);
+    
+    /* const [articles, setArticles] = useState(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -36,14 +38,26 @@ const NewsList = ({ category }) => {
         };
         fetchData();
     }, [category])
+    */
+
+    const [loading, response, error] = usePromise(() => {
+        const query = category === "All" ? "" : `&category=${category}`;
+        return axios.get(`https://newsapi.org/v2/top-headlines?country=us${query}&apiKey=512f60d7572f4a1d8336a7d74b60cd1d`);
+    }, [category]);
 
     if (loading) {
         return <NewsListBlock>Waiting ...</NewsListBlock>
     } 
 
-    if (!articles) {
+    if (!response) {
         return null;
     }
+
+    if (error) {
+        return <NewsListBlock>Error !!!</NewsListBlock>
+    }
+
+    const { articles } = response.data;
 
     return (
         <NewsListBlock>
